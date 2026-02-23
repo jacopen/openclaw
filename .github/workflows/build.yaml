@@ -18,11 +18,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: android-actions/setup-android@v3
-      - name: Build Release APK
-        run: ./gradlew :app:assembleRelease
+      - name: Build APKs
+        run: ./gradlew :app:assembleDebug :app:assembleRelease
         working-directory: apps/android
       - name: Upload to Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: apps/android/app/build/outputs/apk/release/*.apk
+          files: |
+            apps/android/app/build/outputs/apk/debug/*.apk
+            apps/android/app/build/outputs/apk/release/*.apk
