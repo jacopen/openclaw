@@ -1,9 +1,12 @@
-# .github/workflows/android-release.yml
 name: Build Android APK
 on:
   release:
     types: [published]
   workflow_dispatch:
+
+concurrency:
+  group: android-build-${{ github.event.release.tag_name || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -15,15 +18,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: android-actions/setup-android@v3
-      - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug
-        working-directory: apps/android
       - name: Build Release APK
         run: ./gradlew :app:assembleRelease
         working-directory: apps/android
       - name: Upload to Release
-        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
         with:
-          files: |
-            apps/android/app/build/outputs/apk/debug/*.apk
-            apps/android/app/build/outputs/apk/release/*.
+          files: apps/android/app/build/outputs/apk/release/*.apk
